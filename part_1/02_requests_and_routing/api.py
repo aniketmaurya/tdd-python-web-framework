@@ -16,16 +16,9 @@ class API:
         response.status_code = 404
         response.text = "Not found."
 
-    def handle_request(self, request: Request) -> Response:
-        response = Response()
-        handler = self.find_handler(request)
-        if handler:
-            handler(request, response)
-        else:
-            self.default_response(response)
-        return response
-
     def route(self, path):
+        assert path not in self.routes, f"multiple routes with same path={path} "
+
         def wrapper(handler):
             self.routes[path] = handler
             return handler
@@ -39,3 +32,12 @@ class API:
                 return handler, parsed_result.named
 
         return None, None
+
+    def handle_request(self, request: Request) -> Response:
+        response = Response()
+        handler, path_kwargs = self.find_handler(request)
+        if handler:
+            handler(request, response, **path_kwargs)
+        else:
+            self.default_response(response)
+        return response
