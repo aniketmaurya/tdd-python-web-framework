@@ -1,8 +1,9 @@
-from webob import Request, Response
-from requests import Session as RequestsSession
-from wsgiadapter import WSGIAdapter as RequestsWSGIAdapter
-from parse import parse
 import inspect
+
+from parse import parse
+from requests import Session as RequestsSession
+from webob import Request, Response
+from wsgiadapter import WSGIAdapter as RequestsWSGIAdapter
 
 
 class API:
