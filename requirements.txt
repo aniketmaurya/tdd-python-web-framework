@@ -1,0 +1,4 @@
+parse
+webob
+requests
+requests-wsgi-adapter
