@@ -50,3 +50,11 @@ def template_handler(request, response):
     response.body = app.template(
         "index.html", context={"name": "Bumbo", "title": "Best Framework"}
     ).encode()
+
+
+# Expcetption handling for path not found
+def custom_exception_handler(req, resp, exc):
+    resp.text = str(exc)
+
+
+app.add_exception_handler(custom_exception_handler)

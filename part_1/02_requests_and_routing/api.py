@@ -5,25 +5,27 @@ from jinja2 import Environment, FileSystemLoader
 from parse import parse
 from requests import Session as RequestsSession
 from webob import Request, Response
+from whitenoise import WhiteNoise
 from wsgiadapter import WSGIAdapter as RequestsWSGIAdapter
 
 
 class API:
-    def __init__(self, template_dir="templates") -> None:
+    def __init__(self, templates_dir="templates", static_dir="static"):
         self.routes = {}
+        self.exception_handler = None
         self.templates_env = Environment(
-            loader=FileSystemLoader(os.path.abspath(template_dir))
+            loader=FileSystemLoader(os.path.abspath(templates_dir))
         )
-
-    def template(self, template_name, context=None):
-        if context is None:
-            context = {}
-        return self.templates_env.get_template(template_name).render(**context)
+        self.whitenoise = WhiteNoise(self.wsgi_app, root=static_dir)
 
     def __call__(self, environ, start_response):
+        return self.whitenoise(environ, start_response)
+
+    def wsgi_app(self, environ, start_response):
         request = Request(environ)
 
         response = self.handle_request(request)
+
         return response(environ, start_response)
 
     def default_response(self, response):
@@ -56,13 +58,27 @@ class API:
             handler = getattr(handler(), request.method.lower(), None)
             if handler is None:
                 raise AttributeError("Method not allowed", request.method)
-        if handler:
-            handler(request, response, **path_kwargs)
-        else:
-            self.default_response(response)
+        try:
+            if handler:
+                handler(request, response, **path_kwargs)
+            else:
+                self.default_response(response)
+        except Exception as e:
+            if self.exception_handler is None:
+                raise e
+            else:
+                self.exception_handler(request, response, e)
         return response
 
     def test_session(self, base_url="http://testserver"):
         session = RequestsSession()
         session.mount(prefix=base_url, adapter=RequestsWSGIAdapter(self))
         return session
+
+    def add_exception_handler(self, exc_handler):
+        self.exception_handler = exc_handler
+
+    def template(self, template_name, context=None):
+        if context is None:
+            context = {}
+        return self.templates_env.get_template(template_name).render(**context)
