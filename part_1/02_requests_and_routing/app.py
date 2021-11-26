@@ -31,3 +31,22 @@ class BooksResource:
 
     def post(self, req, resp):
         resp.text = "Endpoint to create a book"
+
+
+def yolo(req, resp):
+    resp.text = "YOLO"
+
+
+def yolo1(req, resp):
+    resp.text = "YOLO1"
+
+
+app.add_route("/yolo", yolo)
+app.add_route("/yolo1", yolo1)
+
+
+@app.route("/template")
+def template_handler(request, response):
+    response.body = app.template(
+        "index.html", context={"name": "Bumbo", "title": "Best Framework"}
+    ).encode()

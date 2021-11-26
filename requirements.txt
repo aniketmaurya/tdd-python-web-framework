@@ -3,3 +3,4 @@ webob
 requests
 requests-wsgi-adapter
 pytest-cov
+jinja2
