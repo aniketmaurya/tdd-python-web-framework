@@ -133,7 +133,7 @@ def test_assets_are_served(tmpdir_factory):
     api = API(static_dir=str(static_dir))
     client = api.test_session()
 
-    response = client.get(f"http://testserver/{FILE_DIR}/{FILE_NAME}")
+    response = client.get(f"http://testserver/static/{FILE_DIR}/{FILE_NAME}")
 
     assert response.status_code == 200
     assert response.text == FILE_CONTENTS
