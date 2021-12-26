@@ -14,7 +14,7 @@ app = API()
 app.add_middleware(SimpleCustomMiddleware)
 
 
-@app.route("/home")
+@app.route("/home", allowed_methods=["post"])
 def home(request, response):
     response.text = "Hello from the HOME page"
 
